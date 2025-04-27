@@ -1,4 +1,7 @@
+vim.g.mapleader = " " -- Space as leader key
+
 -- Disable mouse and arrow keys
+
 vim.o.mouse = ""
 vim.api.nvim_set_keymap("n", "<Up>", ":echo 'Use k!'<CR>", { noremap = true, silent = false })
 vim.api.nvim_set_keymap("n", "<Down>", ":echo 'Use j!'<CR>", { noremap = true, silent = false })
@@ -15,6 +18,15 @@ vim.api.nvim_set_keymap("n", "<Tab>", ":bnext<CR>", { noremap = true })
 vim.api.nvim_set_keymap("n", "<S-Tab>", ":bprevious<CR>", { noremap = true })
 
 vim.api.nvim_set_keymap("n", "<leader>nl", "a<CR><Tab><Tab><Esc>O", { noremap = true, silent = true })
+-- Saving on buffer change
+vim.api.nvim_create_autocmd({"BufLeave", "WinLeave", "FocusLost"}, {
+  pattern = "*",
+  callback = function()
+    vim.cmd("silent! wa")  -- Save all files
+    vim.notify("Auto-saved!", vim.log.levels.INFO, { timeout = 500 })  -- Show message for 500ms
+  end
+})
+
 -- UI Improvements
 vim.o.number = true -- Show line numbers
 vim.o.relativenumber = true -- Relative line numbers for fast movement
@@ -29,6 +41,12 @@ vim.o.tabstop = 4
 vim.o.expandtab = true -- Use spaces instead of tabs
 vim.o.autoindent = true
 
+-- Bufferline keymaps Going between buffors.
+vim.keymap.set("n", "<leader>t", ":BufferLineCycleNext<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>T", ":BufferLineCyclePrev<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>c", ":bdelete<CR>", { noremap = true, silent = true }) -- Close buffer
+
+
 -- Performance
 vim.o.updatetime = 250 -- Faster updates
 vim.o.timeoutlen = 500 -- Faster key mappings
@@ -40,7 +58,6 @@ vim.o.undofile = true -- Persistent undo history
 vim.o.clipboard = "unnamedplus" -- Use system clipboard
 
 -- Leader Key
-vim.g.mapleader = " " -- Space as leader key
 
 -- Load Lazy.nvim
 vim.opt.rtp:prepend("~/.local/share/nvim/lazy/lazy.nvim")
@@ -78,10 +95,24 @@ require("lazy").setup({
       vim.keymap.set("n", "<leader>fg", ":Telescope live_grep<CR>", { silent = true }) -- Search text in files
       vim.keymap.set("n", "<leader>fb", ":Telescope buffers<CR>", { silent = true }) -- List open buffers
     end
-  }
+  },
+    {
+        "akinsho/bufferline.nvim",
+        version = "*",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        config = function()
+        require("bufferline").setup({})
+        end,
+    },
+
+
 })
 
 vim.cmd("colorscheme gruvbox")
+vim.opt.termguicolors = true
+vim.opt.showtabline = 2
+
+
 require("lualine").setup()
 require("nvim-tree").setup()
 vim.api.nvim_set_keymap("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true })
